@@ -50,7 +50,6 @@ networkx==2.5
 nltk==3.5
 notebook==6.1.4
 numba==0.51.2
-numexpr==2.7.1
 numpy==1.19.2
 numpydoc==1.1.0
 oauthlib==3.1.1
