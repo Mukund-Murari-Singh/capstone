@@ -115,7 +115,7 @@ Rtree==0.9.5
 ruamel_yaml==0.15.87
 scikit-image==0.18.0
 scikit-learn==1.0.2
-scipy==1.5.2
+scipy==1.5.3
 sklearn-crfsuite==0.3.6
 spacy==3.0.7
 spacy-legacy==3.0.8
