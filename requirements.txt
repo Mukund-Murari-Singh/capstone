@@ -113,7 +113,7 @@ rope==0.18.0
 rsa==4.7.2
 Rtree==0.9.5
 ruamel_yaml==0.15.87
-scikit-image==0.17.2
+scikit-image==0.18.0
 scikit-learn==1.0.2
 scipy==1.5.2
 sklearn-crfsuite==0.3.6
