@@ -1,0 +1,51 @@
+<!doctype html>
+<html></html>
+
+<head>
+    <title> Home Page</title>
+</head>
+
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<style>
+    img.hidden { 
+  display: none;
+  }
+</style>
+<body>
+    <h1><center>Sentiment Based Product Recommendation System</center></h1>
+    <p><center>Capstone Deployment</center></p>
+    <p><center>Prepared by: Mukund Murari Singh</center></p>
+</body>
+<br>
+<br>
+<form id="user_input" name="user_input" action= "#" method= 'post'>
+    <p>Please enter a user name below & click "Submit" to generate the top 5 product recommendations for this user:</p>
+    <p><input type= "text" id="username" name= "username" placeholder="{{ last_search }}"</p>
+    <p><input onclick=change() type= "submit" id="myButton1" value= "Submit" </p>
+</form>
+
+<script>
+    function change()
+    {
+        document.getElementById("user_input").submit();
+        document.getElementById("myButton1").disabled=true;
+        document.getElementById("username").disabled=true;
+        document.getElementById('splash').style.display = 'block'; 
+        document.getElementById("spinner").style.display = 'block';
+    }
+</script>
+
+<div id="splash" style="display: none;background-color:white; z-index: 10; position:fixed">Fetching top 5 recommendations will take approximately 60 seconds. Please wait ...</div>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<center><img class="hidden" id="spinner" src="static/spinner.gif" width=60 height=60/></center>
+{% for line in placeholder_text %}
+    <li>{{line}}</li>
+{% endfor %}
