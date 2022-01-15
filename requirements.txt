@@ -1,4 +1,4 @@
-python==3.8.5
+python-3.8.5
 absl-py==0.13.0
 attrs==20.3.0
 bitarray==1.6.1
