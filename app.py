@@ -26,15 +26,14 @@ sentiment_model = pickle.load(open("pickle/sentiment_model.pickle", "rb")) #the 
 vectorizer = pickle.load(open("pickle/vectorizer.pickle", "rb")) #Tf-idf vectorizer to vectorize lemmatized text
 overall_top5 = pickle.load(open("pickle/overall_top5.pickle", "rb")) #overall top 5 items by poplarity & sentiment
 
+clean_data['item_code']=clean_data.name.apply(lambda x:item_label.transform([x])[0])
+clean_data['predicted_sentiment']=clean_data.text_title_lemma.apply(lambda x:sentiment_model.predict(vectorizer.transform([x]))[0])
 def get_frac(item_code):
     try:
         frac=round(clean_data[clean_data.item_code==item_code].predicted_sentiment.value_counts(normalize=True).loc['Positive'],3)
     except:
         frac=0
     return frac
-
-clean_data['item_code']=clean_data.name.apply(lambda x:item_label.transform([x])[0])
-clean_data['predicted_sentiment']=clean_data.text_title_lemma.apply(lambda x:sentiment_model.predict(vectorizer.transform([x]))[0])
 pos_frac_dict={item_code:get_frac(item_code) for item_code in clean_data.item_code.unique()}
 
 def get_top5_2(input1):
@@ -50,7 +49,7 @@ def get_top5_2(input1):
     #Returning top 5 recommendations for input_user
     output_text=['The top 5 items recommended for user "{}" are:'.format(input1)]
     for number in range(5):
-        output_text.append('{}. {}'.format(number+1,item_label.inverse_transform(list(output.item_code)[number])))
+        output_text.append('{}. {}'.format(number+1,item_label.inverse_transform([list(output.item_code)[number]])))
     return output_text
 
 #Defining the main function under home page endpoint
