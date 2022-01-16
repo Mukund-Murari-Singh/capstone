@@ -4,8 +4,11 @@
 # This loads the requisite pickles and defines the function to apply the sentiment model
 # and the recommendation system
 
-from flask import Flask, flash, render_template, request, redirect, url_for
-import pickle, re, pandas as pd, numpy as np 
+from flask import Flask, flash, render_template, request #, redirect, url_for
+import pickle, re, pandas as pd #, numpy as np 
+from utils import count_words_at_url
+from rq import Queue
+from worker import conn
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -15,6 +18,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 app = Flask(__name__)  # intitialize the flaks app  # common 
+
+q = Queue(connection=conn)
+result = q.enqueue(count_words_at_url, 'http://heroku.com')
+
 app.secret_key = 'c-4@z5K;G2U0p/o.iaw[{?'
 #loading the pickled files for the app to execute
 clean_data = pickle.load(open("pickle/clean_data.pickle", "rb")) #the dataframe holding processed database
@@ -44,7 +51,6 @@ def home():
     if request.method == 'GET':
         return render_template('index.html', placeholder_text=output1)
 
-#Define the function which gets top 5 recommendations based on username input
 def get_top5(input1,user_label,item_label,item_prediction,clean_data,vectorizer,sentiment_model):
     input_user=user_label.transform([input1])[0] #convert to label encoded value
     #Generate top 20 recommended products from item-based recommendation system for this user
