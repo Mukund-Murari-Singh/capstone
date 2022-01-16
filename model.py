@@ -17,7 +17,7 @@ user_label = pickle.load(open("pickle/user_label.pickle", "rb"))    #username la
 item_label = pickle.load(open("pickle/item_label.pickle", "rb"))    #item name label encoder
 item_prediction = pickle.load(open("pickle/item_prediction.pickle", "rb")) #the item-based recommendation matrix
 sentiment_model = pickle.load(open("pickle/sentiment_model.pickle", "rb")) #the ML model for sentiment prediction
-vectorizer = pickle.load(open("pickle/vectorizer.pickle", "rb")) #Tf-idf vectorizer
+vectorizer = pickle.load(open("pickle/vectorizer.pickle", "rb")) #Tf-idf vectorizer to vectorize lemmatized text
 overall_top5 = pickle.load(open("pickle/overall_top5.pickle", "rb")) #overall top 5 items by poplarity & sentiment
 
 def cold_start_top5():   #for cold start cases when input username is not in database, i recommend overall top 5 items by poplarity & sentiment 
