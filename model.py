@@ -28,13 +28,16 @@ def cold_start_top5():   #for cold start cases when input username is not in dat
 def get_users_list():
     return list(clean_data.reviews_username.unique()) #list of all unique users in database
 
-def get_top5(input1):
+def get_top20(input1):
     input_user=user_label.transform([input1])[0] #convert to label encoded value
     #Generate top 20 recommended products from item-based recommendation system for this user
     #Top 20 items for input_user
     pred20=pd.DataFrame(item_prediction.loc[:,input_user].sort_values(ascending=False)[0:20]).rename(columns={input_user:'scoring'}).reset_index()
     pred20['item_name']=pred20.item.apply(lambda x:item_label.inverse_transform([x])[0])
     #Processing the top 20 recommended items' reviews for sentiment
+    return pred20
+
+def get_top5(pred20):
     output_dict={'item_name':[],'total_reviews':[],'positive_fraction':[]}
     for item in pred20.item_name:
         positive_count=0
@@ -48,8 +51,11 @@ def get_top5(input1):
         output_dict['total_reviews'].append(total_reviews)
         output_dict['positive_fraction'].append(round(positive_count/total_reviews,3)) #calculating positive fraction of all reviews for item
     output=pd.DataFrame(output_dict).sort_values(by='positive_fraction',ascending=False)
+    return output
+
+def output_reco(output,input1):
     #Returning top 5 recommendations for input_user
-    output_text=['The top 5 items recommended for user "{}" are:'.format(user_label.inverse_transform([input_user])[0])]
+    output_text=['The top 5 items recommended for user "{}" are:'.format(input1)] #user_label.inverse_transform([input_user])[0])]
     for number in range(5):
         output_text.append('{}. {}'.format(number+1,list(output.item_name)[number]))
     return output_text
