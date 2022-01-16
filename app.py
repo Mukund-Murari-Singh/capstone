@@ -6,21 +6,15 @@
 
 from flask import Flask, flash, render_template, request #, redirect, url_for
 import pickle, re, pandas as pd #, numpy as np 
-#from utils import count_words_at_url
-from rq import Queue
-from worker import conn
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import LabelEncoder
+#from sklearn.feature_extraction.text import TfidfVectorizer
+#from sklearn.linear_model import LogisticRegression
+#from sklearn.preprocessing import LabelEncoder
 
 import warnings
 warnings.filterwarnings("ignore")
 
 app = Flask(__name__)  # intitialize the flaks app  # common 
-
-q = Queue(connection=conn)
-#result = q.enqueue(count_words_at_url, 'http://heroku.com')
 
 app.secret_key = 'c-4@z5K;G2U0p/o.iaw[{?'
 #loading the pickled files for the app to execute
@@ -32,22 +26,47 @@ sentiment_model = pickle.load(open("pickle/sentiment_model.pickle", "rb")) #the 
 vectorizer = pickle.load(open("pickle/vectorizer.pickle", "rb")) #Tf-idf vectorizer to vectorize lemmatized text
 overall_top5 = pickle.load(open("pickle/overall_top5.pickle", "rb")) #overall top 5 items by poplarity & sentiment
 
+def get_frac(item_code):
+    try:
+        frac=round(clean_data[clean_data.item_code==item_code].predicted_sentiment.value_counts(normalize=True).loc['Positive'],3)
+    except:
+        frac=0
+    return frac
+
+clean_data['item_code']=clean_data.name.apply(lambda x:item_label.transform([x])[0])
+clean_data['predicted_sentiment']=clean_data.text_title_lemma.apply(lambda x:sentiment_model.predict(vectorizer.transform([x]))[0])
+pos_frac_dict={item_code:get_frac(item_code) for item_code in clean_data.item_code.unique()}
+
+def get_top5_2(input1):
+    input_user=user_label.transform([input1])[0] #convert to label encoded value
+    #Generate top 20 recommended products from item-based recommendation system for this user
+    #Top 20 items for input_user
+    pred20=pd.DataFrame(item_prediction.loc[:,input_user].sort_values(ascending=False)[0:20]).reset_index()
+    output_dict={'item_code':[],'positive_fraction':[]}
+    for item in pred20.item:
+        output_dict['item_code'].append(item)
+        output_dict['positive_fraction'].append(pos_frac_dict.get(item))
+        output=pd.DataFrame(output_dict).sort_values(by='positive_fraction',ascending=False).head()
+    #Returning top 5 recommendations for input_user
+    output_text=['The top 5 items recommended for user "{}" are:'.format(input1)]
+    for number in range(5):
+        output_text.append('{}. {}'.format(number+1,item_label.inverse_transform(list(output.item_code)[number])))
+    return output_text
+
 #Defining the main function under home page endpoint
 @app.route('/',methods=['POST','GET'])
 def home():
-    #for cold start cases when input username is not in database, i recommend overall top 5 items by poplarity & sentiment 
-    output1=['For first time user with no purchase history in database, please find below the overall top 5 items recommended by sentiment & popularity from database:']
-    output1.extend(['{}. {}'.format(i+1,overall_top5[i]) for i in range(5)])
     if request.method == 'POST':
         input1=request.form['username'] #fetching username input from app
         input1=input1.lower() #converting input to lowercase
         if input1 in list(clean_data.reviews_username.unique()): #checking if entered username is in database
-            result = q.enqueue(get_top5, (input1)) #,user_label,item_label,item_prediction,clean_data,vectorizer,sentiment_model))
-            output1=result #get_top5(input1,user_label,item_label,item_prediction,clean_data,vectorizer,sentiment_model)
+            output1=get_top5_2(input1) #,user_label,item_label,item_prediction,clean_data,vectorizer,sentiment_model)
         elif re.search('[^\s]',input1) is None: #checking if anything has been input or not
             flash('No username entered! Please enter a username & click "Submit".')
+            output1=cold_start_output()
         else:
             flash('Username "{}" not found! Please try again.'.format(input1))
+            output1=cold_start_output()
         return render_template('index.html', placeholder_text=output1, last_search=input1)
     if request.method == 'GET':
         return render_template('index.html', placeholder_text=output1)
@@ -77,6 +96,11 @@ def get_top5(input1):#,user_label,item_label,item_prediction,clean_data,vectoriz
     for number in range(5):
         output_text.append('{}. {}'.format(number+1,list(output.item_name)[number]))
     return output_text
+
+def cold_start_output(): #for cold start cases when input username is not in database, i recommend overall top 5 items by poplarity & sentiment
+    output_cs=['For first time user with no purchase history in database, please find below the overall top 5 items recommended by sentiment & popularity from database:']
+    output_cs.extend(['{}. {}'.format(i+1,overall_top5[i]) for i in range(5)])
+    return output_cs
 
 if __name__ == '__main__' :
     app.run(debug=True)
