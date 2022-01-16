@@ -6,7 +6,7 @@
 
 from flask import Flask, flash, render_template, request #, redirect, url_for
 import pickle, re, pandas as pd #, numpy as np 
-from utils import count_words_at_url
+#from utils import count_words_at_url
 from rq import Queue
 from worker import conn
 
@@ -20,7 +20,7 @@ warnings.filterwarnings("ignore")
 app = Flask(__name__)  # intitialize the flaks app  # common 
 
 q = Queue(connection=conn)
-result = q.enqueue(count_words_at_url, 'http://heroku.com')
+#result = q.enqueue(count_words_at_url, 'http://heroku.com')
 
 app.secret_key = 'c-4@z5K;G2U0p/o.iaw[{?'
 #loading the pickled files for the app to execute
@@ -41,17 +41,18 @@ def home():
     if request.method == 'POST':
         input1=request.form['username'] #fetching username input from app
         input1=input1.lower() #converting input to lowercase
-        if re.search('[^\s]',input1) is None: #checking if anything has been input or not
+        if input1 in list(clean_data.reviews_username.unique()): #checking if entered username is in database
+            result = q.enqueue(get_top5, (input1)) #,user_label,item_label,item_prediction,clean_data,vectorizer,sentiment_model))
+            output1=result #get_top5(input1,user_label,item_label,item_prediction,clean_data,vectorizer,sentiment_model)
+        elif re.search('[^\s]',input1) is None: #checking if anything has been input or not
             flash('No username entered! Please enter a username & click "Submit".')
-        elif input1 in list(clean_data.reviews_username.unique()): #checking if entered username is in database
-            output1=get_top5(input1,user_label,item_label,item_prediction,clean_data,vectorizer,sentiment_model)
         else:
             flash('Username "{}" not found! Please try again.'.format(input1))
         return render_template('index.html', placeholder_text=output1, last_search=input1)
     if request.method == 'GET':
         return render_template('index.html', placeholder_text=output1)
 
-def get_top5(input1,user_label,item_label,item_prediction,clean_data,vectorizer,sentiment_model):
+def get_top5(input1):#,user_label,item_label,item_prediction,clean_data,vectorizer,sentiment_model):
     input_user=user_label.transform([input1])[0] #convert to label encoded value
     #Generate top 20 recommended products from item-based recommendation system for this user
     #Top 20 items for input_user
