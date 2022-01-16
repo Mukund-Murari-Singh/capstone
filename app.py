@@ -11,7 +11,7 @@ app.secret_key = 'c-4@z5K;G2U0p/o.iaw[{?'
 #Defining the main function under home page endpoint
 @app.route('/',methods=['POST','GET'])
 def home():
-    output1=cold_start_top5     #getting list of recommendations for a cold start situation when user is not in database
+    output1=cold_start_top5()     #getting list of recommendations for a cold start situation when user is not in database
     all_users=get_users_list()  #list of all users in database
     if request.method == 'POST':
         input1=request.form['username'] #fetching username input from app
