@@ -2,7 +2,7 @@
 <html></html>
 
 <head>
-    <title> Home Page</title>
+    <title>Capstone Mukund Murari Singh</title>
 </head>
 
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
@@ -19,7 +19,7 @@
 <br>
 <br>
 <form id="user_input" name="user_input" action= "#" method= 'post'>
-    <p>Please enter a user name below & click "Submit" to generate the top 5 product recommendations for this user:</p>
+    <p>Please enter a user name (case insensitive) below & click "Submit" to generate the top 5 product recommendations for this user:</p>
     <p><input type= "text" id="username" name= "username" placeholder="{{ last_search }}"</p>
     <p><input onclick=change() type= "submit" id="myButton1" value= "Submit" </p>
 </form>
