@@ -58,7 +58,7 @@ def home():
             output1=cold_start_output()
         return render_template('index.html', placeholder_text=output1, last_search=input1)
     if request.method == 'GET':
-        return render_template('index.html', placeholder_text=output1)
+        return render_template('index.html', placeholder_text=cold_start_output())
 
 def get_top5(input1):#,user_label,item_label,item_prediction,clean_data,vectorizer,sentiment_model):
     input_user=user_label.transform([input1])[0] #convert to label encoded value
