@@ -35,7 +35,7 @@
     }
 </script>
 
-<div id="splash" style="display: none;background-color:white; z-index: 10; position:fixed">Fetching top 5 recommendations will take approximately 60 seconds. Please wait ...</div>
+<div id="splash" style="display: none;background-color:white; z-index: 10; position:fixed">Fetching top 5 recommendations within 30 seconds (Heroku time-limit). Please wait ...</div>
 {% with messages = get_flashed_messages() %}
   {% if messages %}
     <ul class=flashes>
